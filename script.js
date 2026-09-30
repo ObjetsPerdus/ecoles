@@ -13,7 +13,7 @@ const LOCATIONS = {
     'Ribambelle':    'ribambelle@example.com',
     'Trois saisons': 'troissaisons@example.com',
     'Tournesol':     'tournesol@example.com',
-    'Odyssee':        'odysse@example.com'
+    'Odyssee':        'odyssee@example.com'
 };
 
 // Fill the <select> from LOCATIONS
