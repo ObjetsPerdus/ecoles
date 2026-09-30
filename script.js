@@ -1,10 +1,10 @@
 // tolololol
-const REPO_OWNER = 'absurd-oliver';
-const REPO_NAME = 'LostAndFound';
+const REPO_OWNER = 'ObjetsPerdus';
+const REPO_NAME = 'ecoles';
 
 // Split token
-const PT1 = "ghp_uDCQTjHtyOmwqIY";
-const PT2 = "ipDlCxmk5NuqGNg0cYo54";
+const PT1 = "ghp_a6vbzc36iiIZDxJ";
+const PT2 = "5PvaIuSgdsNPQmF3OxmEN";
 const G_TOKEN = PT1 + PT2;
 
 // Location -> email that receives claims for items found there (placeholders for now)
