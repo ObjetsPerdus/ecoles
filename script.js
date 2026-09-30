@@ -30,7 +30,7 @@ function populateLocations() {
 // Builds a mailto: link addressed to the location's email
 function buildClaimLink(issue, parentName, location) {
     const to = LOCATIONS[location];
-    const subject = `Item claimed: ${issue.title}`;
+    const subject = `Objet réclamé: ${issue.title}`;
 const body =
 `Bonjour,
 
