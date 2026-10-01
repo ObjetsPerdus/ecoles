@@ -4,7 +4,7 @@ Tableau d'objets perdus pour les écoles de **Mont-Tremblant, QC**, conçu pour 
 
 Un parent qui trouve un objet l'ajoute au tableau avec une description et, au besoin, une photo. Le propriétaire n'a qu'à parcourir le tableau et à réclamer l'objet par courriel auprès de l'école concernée.
 
-> ⚠️ Le projet en est à ses débuts. Vos commentaires sont les bienvenus : utilisez la boîte à commentaires en bas de la page du site, ou envoyez un couriel a cette addresse: `skiwitholio@gmail.com`.
+> ⚠️ Le projet en est à ses débuts. Vos commentaires sont les bienvenus : utilisez la boîte à commentaires en bas de la page du site, ou envoyez un courriel au `skiwitholio@gmail.com` sur ce dépôt.
 
 ## Fonctionnalités
 
@@ -68,7 +68,7 @@ Puis ouvrez <http://localhost:8000>.
 
 Les suggestions et corrections sont les bienvenues :
 
-1. Ouvrez une *issue* pour proposer une idée ou signaler un bogue
+1. Envoyez un courriel au `skiwitholio@gmail.com` pour proposer une idée ou signaler un bogue
 2. Ou faites un *fork* et soumettez une *pull request*
 
 ## Technologies
