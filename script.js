@@ -153,7 +153,7 @@ async function fetchBoardItems() {
                     <strong>Reported By:</strong> ${escapeHTML(parentName)}<br>
                     <strong>Contact:</strong> ${escapeHTML(contact)}
                 </div>
-                ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}">Réclamer cet objet</a>` : ''}
+                ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}" onClick='closeIssue(event, ${issue.number})'>Réclamer cet objet</a>` : ''}
             `;
 
             // If a photo fails to load, fall back to the placeholder
