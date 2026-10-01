@@ -10,6 +10,7 @@
 
     <header>
         <h1>Objets Perdus</h1>
+        <p style="font-weight: bolder;">Bonjour cher parents, n'hésitez pas à tester le site et à me faire part de vos retours ; toutes les suggestions sont les bienvenues. Ce projet n'en est qu'à ses débuts.</p>
     </header>
 
     <main class="container">
@@ -19,29 +20,29 @@
             <form id="lostItemForm">
                 <div class="form-group">
                     <label for="itemName">Objet:</label>
-                    <input type="text" id="itemName" required placeholder="e.g., Thermos Bleu">
+                    <input type="text" id="itemName" required placeholder="ex. Thermos Bleu">
                 </div>
                 
                 <div class="form-group">
-                    <label for="description">Description / lieu:</label>
-                    <textarea id="description" required placeholder="e.g., laisé sur un banc"></textarea>
+                    <label for="description">Description / Lieu:</label>
+                    <textarea id="description" required placeholder="ex. laisé sur un banc"></textarea>
                 </div>
 
                 <div class="form-group">
-                    <label for="location">Quel Campus ?</label>
+                    <label for="location">École:</label>
                     <select id="location" required>
-                        <option value="">Choisir un Campus</option>
+                        <option value="">Choisir un École</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="parentName">Votre Nom:</label>
-                    <input type="text" id="parentName" required placeholder="e.g., Jane Doe">
+                    <input type="text" id="parentName" required placeholder="ex. Jeanne Martin">
                 </div>
 
                 <div class="form-group">
                     <label for="contact">Coordonnées (Email/Téléphone):</label>
-                    <input type="text" id="contact" required placeholder="e.g., jane.doe@email.com">
+                    <input type="text" id="contact" required placeholder="ex. jeanne.martin@email.com">
                 </div>
                 <div class="form-group">
                     <label for="image">Photo (facultatif):</label>
@@ -72,6 +73,11 @@
         </section>
     </main>
 
-    <script src="script.js"></script>
+    <footer><textarea id="feedback" placeholder="veuillez écrire vos commentaires ici:" style="width: fit-content; height: fit-content;"></textarea><br><button id="sendFeddbackButton">envoyer commentaire</button><br>source: <a href="https://github.com/ObjetsPerdus/ecoles">repo github</a><br><b>Mont-Tremblant, QC</b></footer>
+
+    <script src="script.js" type="module"></script>
+    <script src="email.js" type="module" defer></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript"> (function(){ emailjs.init({ publicKey: "auLK2yMPvnrWvZIzI", }); })(); </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 :root {
-    --primary: #4f46e5;
-    --primary-hover: #4338ca;
+    --primary: #cc3dda;
+    --primary-hover: #be38ca;
     --bg: #f9fafb;
     --card-bg: #ffffff;
     --text: #1f2937;
@@ -32,6 +32,13 @@ header h1 {
 header p {
     margin: 0;
     color: var(--text-muted);
+}
+
+footer {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    padding: 1rem 0.5rem;
 }
 
 .container {

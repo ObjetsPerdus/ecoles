@@ -1,4 +1,6 @@
-// tolololol
+import {sendFeedback} from './email.js';
+
+// trolololol
 const REPO_OWNER = 'ObjetsPerdus';
 const REPO_NAME = 'ecoles';
 
@@ -362,6 +364,8 @@ function setupFilter() {
 function escapeHTML(str) {
     return str.replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
 }
+
+document.getElementById("sendFeddbackButton").addEventListener('click', sendFeedback);
 
 document.addEventListener('DOMContentLoaded', () => {
     populateLocations();
