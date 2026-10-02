@@ -310,7 +310,7 @@ function applyFilter() {
         const msg = document.createElement('p');
         msg.id = 'filterEmpty';
         msg.className = 'loading';
-        msg.textContent = `Aucun objet perdu n'a encore été signalé à ${value} ! Tout le monde a ses affaires.`;
+        msg.innerHTML = `Aucun objet perdu n'a encore été signalé à <b style="color: var(--primary);">${value}</b> ! Tout le monde a ses affaires.`;
         container.appendChild(msg);
     }
 }
