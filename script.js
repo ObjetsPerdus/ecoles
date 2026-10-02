@@ -160,8 +160,6 @@ async function fetchBoardItems() {
                 ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}" onClick='closeIssue(event, ${issue.number})'>Réclamer cet objet</a>` : ''}
             `;
 
-            console.log(card)
-
             // If a photo fails to load, fall back to the placeholder
             card.querySelector('.item-image').onerror = function () {
                 this.onerror = null;
@@ -281,51 +279,6 @@ try {
         status.classList.remove('hidden');
     }
 });
-
-// Draw the cards, applying the current location filter
-function renderBoard() {
-    const container = document.getElementById('itemsContainer');
-    container.innerHTML = '';
-
-    if (allItems.length === 0) {
-        container.innerHTML = '<p class="loading">Aucun objet perdu n\'a encore été signalé ! Tout le monde a ses affaires.</p>';
-        return;
-    }
-
-    const visible = currentFilter
-        ? allItems.filter(item => item.location === currentFilter)
-        : allItems;
-
-    if (visible.length === 0) {
-        container.innerHTML = `<p class="loading">Aucun objet trouvé à : ${escapeHTML(currentFilter)}.</p>`;
-        return;
-    }
-
-    visible.forEach(({ issue, description, parentName, contact, location, imageUrl, hasLocation }) => {
-        const card = document.createElement('div');
-        card.className = 'item-card';
-        card.innerHTML = `
-            <img class="item-image" src="${escapeHTML(imageUrl)}" alt="${escapeHTML(issue.title)}" loading="lazy">
-            ${hasLocation ? `<span class="location-tag">${escapeHTML(location)}</span>` : ''}
-            <h3>${escapeHTML(issue.title)}</h3>
-            <div class="date">Reported: ${new Date(issue.created_at).toLocaleDateString()}</div>
-            <p>${escapeHTML(description)}</p>
-            <div class="meta">
-                <strong>Reported By:</strong> ${escapeHTML(parentName)}<br>
-                <strong>Contact:</strong> ${escapeHTML(contact)}
-            </div>
-            ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}">Réclamer cet objet</a>` : ''}
-        `;
-
-        // If a photo fails to load, fall back to the placeholder
-        card.querySelector('.item-image').onerror = function () {
-            this.onerror = null;
-            this.src = PLACEHOLDER_IMG;
-        };
-
-        container.appendChild(card);
-    });
-} // might be useless ???
 
 // Build the filter menu and wire up open/close behaviour
 function setupFilter() {
