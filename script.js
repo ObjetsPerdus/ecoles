@@ -126,8 +126,9 @@ async function fetchBoardItems() {
             container.innerHTML = '<p class="loading">Aucun objet perdu n\'a encore été signalé ! Tout le monde a ses affaires.</p>';
             return;
         }
-
+        let tempCount = 0;
         items.forEach(issue => {
+            tempCount += 1;
             const body = issue.body.replace(/\r\n/g, '\n');
             const [description, footer = ''] = body.split('\n\n---\n');
             const parentName =(footer.match(/\*\*(?:Signalé par|Reported By) :\*\* (.*)/) || [])[1] || '';
@@ -144,6 +145,7 @@ async function fetchBoardItems() {
             const hasLocation = Object.prototype.hasOwnProperty.call(LOCATIONS, location);
 
             const card = document.createElement('div');
+            card.id = `item-card-${tempCount}-${location}`;
             card.className = 'item-card';
             card.innerHTML = `
                 <img class="item-image" src="${escapeHTML(imageUrl)}" alt="${escapeHTML(issue.title)}" loading="lazy">
@@ -158,6 +160,8 @@ async function fetchBoardItems() {
                 ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}" onClick='closeIssue(event, ${issue.number})'>Réclamer cet objet</a>` : ''}
             `;
 
+            console.log(card)
+
             // If a photo fails to load, fall back to the placeholder
             card.querySelector('.item-image').onerror = function () {
                 this.onerror = null;
@@ -166,6 +170,9 @@ async function fetchBoardItems() {
 
             container.appendChild(card);
         });
+
+        applyFilter();
+
     } catch (error) {
         console.error(error);
         container.innerHTML = '<p class="loading">Impossible de charger le tableau pour le moment.</p>';
@@ -205,6 +212,8 @@ function closeIssue(event, issueNumber) {
         }
     }, 1000);
 }
+
+window.closeIssue = closeIssue;
 
 // Handle submitting a new item directly to GitHub Issues API
 document.getElementById('lostItemForm').addEventListener('submit', async function(e) {
@@ -273,9 +282,6 @@ try {
     }
 });
 
-let allItems = [];
-let currentFilter = '';
-
 // Draw the cards, applying the current location filter
 function renderBoard() {
     const container = document.getElementById('itemsContainer');
@@ -319,46 +325,41 @@ function renderBoard() {
 
         container.appendChild(card);
     });
-}
+} // might be useless ???
 
 // Build the filter menu and wire up open/close behaviour
 function setupFilter() {
-    const btn = document.getElementById('filterBtn');
-    const menu = document.getElementById('filterMenu');
-    const label = btn.querySelector('.filter-label');
+    const filterSel = document.getElementById('filterSel');
+    Object.keys(LOCATIONS).forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        filterSel.appendChild(option);
+    });
+    filterSel.addEventListener('change', applyFilter);
+}
 
-    const openMenu = () => { menu.classList.remove('hidden'); btn.setAttribute('aria-expanded', 'true'); };
-    const closeMenu = () => { menu.classList.add('hidden'); btn.setAttribute('aria-expanded', 'false'); };
+function applyFilter() {
+    const value = document.getElementById('filterSel').value;
+    const container = document.getElementById('itemsContainer');
+    const old = document.getElementById('filterEmpty');
+    if (old) old.remove();
 
-    const options = [['', 'All locations'], ...Object.keys(LOCATIONS).map(n => [n, n])];
-
-    options.forEach(([value, text], i) => {
-        const opt = document.createElement('button');
-        opt.type = 'button';
-        opt.className = 'filter-option' + (i === 0 ? ' active' : '');
-        opt.textContent = text;
-        opt.setAttribute('role', 'menuitem');
-        opt.addEventListener('click', () => {
-            currentFilter = value;
-            menu.querySelectorAll('.filter-option').forEach(o => o.classList.toggle('active', o === opt));
-            label.textContent = value ? `Filter: ${value}` : 'Filter';
-            btn.classList.toggle('active', Boolean(value));
-            closeMenu();
-            renderBoard();
-        });
-        menu.appendChild(opt);
+    const cards = container.querySelectorAll('.item-card');
+    let shown = 0;
+    cards.forEach(card => {
+        const match = value === '0' || card.id.endsWith(`-${value}`);
+        card.classList.toggle('hidden', !match);
+        if (match) shown++;
     });
 
-    btn.addEventListener('click', e => {
-        e.stopPropagation();
-        menu.classList.contains('hidden') ? openMenu() : closeMenu();
-    });
-    document.addEventListener('click', e => {
-        if (!menu.contains(e.target)) closeMenu();
-    });
-    document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') closeMenu();
-    });
+    if (cards.length > 0 && shown === 0) {
+        const msg = document.createElement('p');
+        msg.id = 'filterEmpty';
+        msg.className = 'loading';
+        msg.textContent = `Aucun objet perdu n'a encore été signalé à ${value} ! Tout le monde a ses affaires.`;
+        container.appendChild(msg);
+    }
 }
 
 function escapeHTML(str) {
@@ -369,6 +370,6 @@ document.getElementById("sendFeddbackButton").addEventListener('click', sendFeed
 
 document.addEventListener('DOMContentLoaded', () => {
     populateLocations();
-    setupFilter();
     fetchBoardItems();
+    setupFilter();
 });
