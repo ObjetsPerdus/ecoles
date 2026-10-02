@@ -325,4 +325,6 @@ document.addEventListener('DOMContentLoaded', () => {
     populateLocations();
     fetchBoardItems();
     setupFilter();
+    document.cookie = "myCookie=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    console.log('Cookie cleared on DOMContentLoaded!');
 });
