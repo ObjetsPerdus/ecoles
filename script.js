@@ -9,7 +9,7 @@ const PT1 = "ghp_a6vbzc36iiIZDxJ";
 const PT2 = "5PvaIuSgdsNPQmF3OxmEN";
 const G_TOKEN = PT1 + PT2;
 
-// Location -> email that receives claims for items found there (placeholders for now)
+// Locations (the email values are no longer used for claims; claims go to the contact email in each issue)
 const LOCATIONS = {
     'Fleur soleil':  'fleursoleil@example.com',
     'Ribambelle':    'ribambelle@example.com',
@@ -29,9 +29,14 @@ function populateLocations() {
     });
 }
 
-// Builds a mailto: link addressed to the location's email
-function buildClaimLink(issue, parentName, location) {
-    const to = LOCATIONS[location];
+// Email check
+function looksLikeEmail(str) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((str || '').trim());
+}
+
+// Builds a mailto: link addressed to the contact email found in the issue
+function buildClaimLink(issue, parentName, location, contact) {
+    const to = contact.trim();
     const subject = `Objet réclamé: ${issue.title}`;
 const body =
 `Bonjour,
@@ -48,7 +53,9 @@ Mes coordonnées :
 
 Merci !`;
 
-    return `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    // Keep "@" readable in the address, encode everything else
+    const safeTo = encodeURIComponent(to).replace(/%40/g, '@');
+    return `mailto:${safeTo}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 // Shown when an item has no photo
@@ -132,7 +139,7 @@ async function fetchBoardItems() {
             const body = issue.body.replace(/\r\n/g, '\n');
             const [description, footer = ''] = body.split('\n\n---\n');
             const parentName =(footer.match(/\*\*(?:Signalé par|Reported By) :\*\* (.*)/) || [])[1] || '';
-            const contact =(footer.match(/\*\*(?:Contact) :\*\* (.*)/) || [])[1] || '';
+            const contact =((footer.match(/\*\*(?:Contact) :\*\* (.*)/) || [])[1] || '').trim();
             const location =((footer.match(/\*\*(?:Lieu|Location) :\*\* (.*)/) || [])[1] || '').trim();
             let imageUrl =((footer.match(/\*\*Image:\*\* (.*)/) || [])[1] || '').trim();
 
@@ -141,8 +148,11 @@ async function fetchBoardItems() {
             // Only accept images that come from this repo
             if (!imageUrl.startsWith(IMAGE_URL_PREFIX)) imageUrl = PLACEHOLDER_IMG;
 
-            // Only show a claim button if the location is one we know an email for
+            // Location tag / filter still depends on a known location
             const hasLocation = Object.prototype.hasOwnProperty.call(LOCATIONS, location);
+
+            // Claim button only if the contact in the issue is an email address
+            const canClaim = looksLikeEmail(contact);
 
             const card = document.createElement('div');
             card.id = `item-card-${tempCount}-${location}`;
@@ -157,7 +167,7 @@ async function fetchBoardItems() {
                     <strong>Reported By:</strong> ${escapeHTML(parentName)}<br>
                     <strong>Contact:</strong> ${escapeHTML(contact)}
                 </div>
-                ${hasLocation ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location))}" onClick='closeIssue(event, ${issue.number})'>Réclamer cet objet</a>` : ''}
+                ${canClaim ? `<a class="btn claim-btn" href="${escapeHTML(buildClaimLink(issue, parentName, location, contact))}" onClick='closeIssue(event, ${issue.number})'>Réclamer cet objet</a>` : ''}
             `;
 
             // If a photo fails to load, fall back to the placeholder
@@ -232,6 +242,12 @@ if (!Object.prototype.hasOwnProperty.call(LOCATIONS, location)) {
         return;
     }
 
+    if (!looksLikeEmail(contact)) {
+        status.textContent = "Veuillez entrer une adresse courriel valide dans le champ Contact.";
+        status.className = "error";
+        return;
+    }
+
     button.disabled = true;
     button.innerText = "Submitting...";
 
@@ -245,7 +261,7 @@ try {
         }
 
         // Format the description text so our parser can easily read it later
-        const issueBody = `${description}\n\n---\n**Signalé par :** ${parentName}\n**Contact :** ${contact}\n**Lieu :** ${location}${imageLine}`;
+        const issueBody = `${description}\n\n---\n**Signalé par :** ${parentName}\n**Contact :** ${contact.trim()}\n**Lieu :** ${location}${imageLine}`;
 
         const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
             method: 'POST',
