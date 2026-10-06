@@ -10,7 +10,7 @@ Un parent qui trouve un objet l'ajoute au tableau avec une description et, au be
 
 - Signaler un objet (nom, description, école, coordonnées, photo facultative)
 - Tableau en direct des objets signalés
-- Réclamation par courriel : un bouton ouvre un message préécrit adressé à l'école
+- Réclamation par courriel : un bouton ouvre un message adressé à l'addresse indiqué sur l'article
 - Retrait d'un objet du tableau une fois réclamé
 - Boîte à commentaires (envoyée par courriel avec [EmailJS](https://www.emailjs.com/))
 
