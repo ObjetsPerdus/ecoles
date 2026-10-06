@@ -249,3 +249,19 @@ textarea {
     align-items: center;
     gap: 0.5rem;
 }
+
+.item-gallery {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    margin-bottom: 0.75rem;
+    border-radius: 6px;
+}
+
+.item-gallery .item-image {
+    flex: 0 0 100%;
+    width: 100%;
+    scroll-snap-align: center;
+    margin-bottom: 0;
+}

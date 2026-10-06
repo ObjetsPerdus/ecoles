@@ -141,12 +141,10 @@ async function fetchBoardItems() {
             const parentName =(footer.match(/\*\*(?:Signalé par|Reported By) :\*\* (.*)/) || [])[1] || '';
             const contact =((footer.match(/\*\*(?:Contact) :\*\* (.*)/) || [])[1] || '').trim();
             const location =((footer.match(/\*\*(?:Lieu|Location) :\*\* (.*)/) || [])[1] || '').trim();
-            let imageUrl =((footer.match(/\*\*Image:\*\* (.*)/) || [])[1] || '').trim();
-
-
-
-            // Only accept images that come from this repo
-            if (!imageUrl.startsWith(IMAGE_URL_PREFIX)) imageUrl = PLACEHOLDER_IMG;
+            const imageUrls = [...footer.matchAll(/\*\*Image:\*\* (.*)/g)]
+                .map(m => m[1].trim())
+                .filter(u => u.startsWith(IMAGE_URL_PREFIX));
+            if (imageUrls.length === 0) imageUrls.push(PLACEHOLDER_IMG);
 
             // Location tag / filter still depends on a known location
             const hasLocation = Object.prototype.hasOwnProperty.call(LOCATIONS, location);
@@ -155,10 +153,14 @@ async function fetchBoardItems() {
             const canClaim = looksLikeEmail(contact);
 
             const card = document.createElement('div');
+            const imagesHTML = imageUrls.map((u, i) =>
+                `<img class="item-image" src="${escapeHTML(u)}" alt="${escapeHTML(issue.title)} (${i + 1})" loading="lazy">`
+            ).join('');
             card.id = `item-card-${tempCount}-${location}`;
             card.className = 'item-card';
             card.innerHTML = `
-                <img class="item-image" src="${escapeHTML(imageUrl)}" alt="${escapeHTML(issue.title)}" loading="lazy">
+                <div class="item-gallery">${imagesHTML}</div>
+                ${imageUrls.length > 1 ? `<div class="date">${imageUrls.length} photos — faites défiler →</div>` : ''}
                 ${hasLocation ? `<span class="location-tag">${escapeHTML(location)}</span>` : ''}
                 <h3>${escapeHTML(issue.title)}</h3>
                 <div class="date">Reported: ${new Date(issue.created_at).toLocaleDateString()}</div>
@@ -171,10 +173,7 @@ async function fetchBoardItems() {
             `;
 
             // If a photo fails to load, fall back to the placeholder
-            card.querySelector('.item-image').onerror = function () {
-                this.onerror = null;
-                this.src = PLACEHOLDER_IMG;
-            };
+            card.querySelectorAll('.item-image').forEach(img => { img.onerror = function () { this.onerror = null; this.src = PLACEHOLDER_IMG; }; });
 
             container.appendChild(card);
         });
@@ -234,7 +233,7 @@ document.getElementById('lostItemForm').addEventListener('submit', async functio
     const parentName = document.getElementById('parentName').value;
     const contact = document.getElementById('contact').value;
     const location = document.getElementById('location').value;
-    const imageFile = document.getElementById('image').files[0];
+    const imageFiles = Array.from(document.getElementById('image').files).slice(0, 5); // cap at 5
 
 if (!Object.prototype.hasOwnProperty.call(LOCATIONS, location)) {
         status.textContent = "Veuillez choisir le lieu où l'objet a été trouvé.";
@@ -252,16 +251,18 @@ if (!Object.prototype.hasOwnProperty.call(LOCATIONS, location)) {
     button.innerText = "Submitting...";
 
 try {
-        let imageLine = '';
-        if (imageFile) {
-            button.innerText = "Téléchargement de l'image...";
-            const imageUrl = await uploadImage(imageFile);
-            imageLine = `\n**Image:** ${imageUrl}`;
+        let imageLines = '';
+        if (imageFiles.length) {
+            const urls = [];
+            for (let i = 0; i < imageFiles.length; i++) {
+                button.innerText = `Téléchargement de l'image ${i + 1}/${imageFiles.length}...`;
+                urls.push(await uploadImage(imageFiles[i]));
+            }
+            imageLines = urls.map(u => `\n**Image:** ${u}`).join('');
             button.innerText = "Envoi en cours...";
         }
 
-        // Format the description text so our parser can easily read it later
-        const issueBody = `${description}\n\n---\n**Signalé par :** ${parentName}\n**Contact :** ${contact.trim()}\n**Lieu :** ${location}${imageLine}`;
+        const issueBody = `${description}\n\n---\n**Signalé par :** ${parentName}\n**Contact :** ${contact.trim()}\n**Lieu :** ${location}${imageLines}`;
 
         const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
             method: 'POST',
