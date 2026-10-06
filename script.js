@@ -95,9 +95,9 @@ function resizeImage(file, maxSize = 800, quality = 0.8) {
 }
 
 // Commit the image to the repo and return its public URL
-async function uploadImage(file) {
+async function uploadImage(file, baseName) {
     const base64 = await resizeImage(file);
-    const path = `images/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const path = `images/${baseName}.jpg`;
 
     const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
         method: 'PUT',
@@ -256,7 +256,8 @@ try {
             const urls = [];
             for (let i = 0; i < imageFiles.length; i++) {
                 button.innerText = `Téléchargement de l'image ${i + 1}/${imageFiles.length}...`;
-                urls.push(await uploadImage(imageFiles[i]));
+                const baseName = `${slugify(itemName)}-${Date.now().toString(36)}-${i + 1}`;
+                urls.push(await uploadImage(imageFiles[i], baseName));
             }
             imageLines = urls.map(u => `\n**Image:** ${u}`).join('');
             button.innerText = "Envoi en cours...";
@@ -330,6 +331,15 @@ function applyFilter() {
         msg.innerHTML = `Aucun objet perdu n'a encore été signalé à <b style="color: var(--primary);">${value}</b> ! Tout le monde a ses affaires.`;
         container.appendChild(msg);
     }
+}
+
+function slugify(str) {
+    return (str || 'objet')
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // strip accents
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+        .slice(0, 40) || 'objet';
 }
 
 function escapeHTML(str) {
