@@ -4,10 +4,7 @@ import {sendFeedback} from './email.js';
 const REPO_OWNER = 'ObjetsPerdus';
 const REPO_NAME = 'ecoles';
 
-// Split token
-const PT1 = "ghp_a6vbzc36iiIZDxJ";
-const PT2 = "5PvaIuSgdsNPQmF3OxmEN";
-const G_TOKEN = PT1 + PT2;
+const API = 'https://objets-perdus-proxy.skiwitholio.workers.dev';
 
 // Locations (the email values are no longer used for claims; claims go to the contact email in each issue)
 const LOCATIONS = {
@@ -97,21 +94,14 @@ function resizeImage(file, maxSize = 800, quality = 0.8) {
 // Commit the image to the repo and return its public URL
 async function uploadImage(file) {
     const base64 = await resizeImage(file);
-    const path = `images/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
 
-    const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${path}`, {
-        method: 'PUT',
-        headers: {
-            'Authorization': `token ${G_TOKEN}`,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message: 'Add item image', content: base64 })
+    const response = await fetch(`${API}/images`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: base64 })
     });
     if (!response.ok) throw new Error(`Image upload failed (${response.status})`);
-
-    const data = await response.json();
-    return data.content.download_url;
+    return (await response.json()).url;
 }
 
 // Fetch and display active lost items directly from GitHub Issues
@@ -194,17 +184,10 @@ function closeIssue(event, issueNumber) {
         if (!confirmation) return;
 
         try {
-            const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${issueNumber}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `token ${G_TOKEN}`,
-                    'Accept': 'application/vnd.github+json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    state: 'closed',
-                    state_reason: 'completed'
-                })
+            const response = await fetch(`${API}/close`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ number: issueNumber })
             });
 
             if (response.ok) {
@@ -264,17 +247,10 @@ try {
 
         const issueBody = `${description}\n\n---\n**Signalé par :** ${parentName}\n**Contact :** ${contact.trim()}\n**Lieu :** ${location}${imageLines}`;
 
-        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
+        const response = await fetch(`${API}/issues`, {
             method: 'POST',
-            headers: {
-                'Authorization': `token ${G_TOKEN}`,
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                title: itemName,
-                body: issueBody
-            })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: itemName, body: issueBody })
         });
 
         if (response.ok) {
